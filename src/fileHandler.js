@@ -1,6 +1,6 @@
-import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { generateChecksum, checkIntegrity } from './integrity.js';
 
 const storageNodes = ['folder1', 'folder2', 'folder3'];
 const metadataFile = './metadata.json'; // File to store metadata
@@ -72,10 +72,10 @@ function ensureDirectoryExists(directory) {
     }
 }
 
-// Upload a single chunk to the specified storage node (folder)
+// Upload a single chunk to the specified storage node at specified path
 export function uploadChunk(chunkBuffer, storageNode, chunkName) {
-    const chunkPath = path.join(storageNode, chunkName); // Construct full path for the chunk
-    fs.writeFileSync(chunkPath, chunkBuffer); // Write the chunk to the storage node
+    const chunkPath = path.join(storageNode, chunkName);
+    fs.writeFileSync(chunkPath, chunkBuffer);
     console.log(`Chunk uploaded to ${chunkPath}`);
 }
 
@@ -103,7 +103,7 @@ export function downloadFile(filePath) {
     return fileBuffer;
 }
 
-// Download a single chunk from the specified storage node (folder)
+// Download a single chunk
 export function downloadChunk(storageNode, chunkName) {
     const chunkPath = path.join(storageNode, chunkName); // Construct full path for the chunk
     if (fs.existsSync(chunkPath)) {
@@ -118,7 +118,6 @@ export function createChunks(fileBuffer) {
     const chunkSize = 64 * 1024; // 64 KB chunk size
     const chunkArray = [];
 
-    // Slice the file buffer into smaller chunks
     for (let i = 0; i < fileBuffer.length; i += chunkSize) {
         const chunk = fileBuffer.slice(i, i + chunkSize);
         chunkArray.push(chunk);
@@ -129,26 +128,12 @@ export function createChunks(fileBuffer) {
 
 // Reassemble an array of chunks into the original file buffer
 export function assembleChunks(chunkArray) {
-    const assembledBuffer = Buffer.concat(chunkArray); // Concatenate all chunks into a single buffer
+    const assembledBuffer = Buffer.concat(chunkArray);
     return assembledBuffer;
 }
 
-// Create a file from a buffer and write it to the specified file path
+// Create a file from a buffer at specified file path
 export function createFileFromBuffer(filePath, fileBuffer) {
-    fs.writeFileSync(filePath, fileBuffer); // Write buffer to disk
+    fs.writeFileSync(filePath, fileBuffer);
     console.log(`File created at ${filePath}`);
-}
-
-// Generate an MD5 checksum for a file buffer to ensure data integrity
-export function generateChecksum(fileBuffer) {
-    const hash = crypto.createHash('md5');
-    hash.update(fileBuffer);
-    const checksum = hash.digest('hex'); // Return MD5 hash as a hexadecimal string
-    return checksum;
-}
-
-// Compare the checksum of a file buffer with the original checksum for integrity verification
-export function checkIntegrity(fileBuffer, originalChecksum) {
-    const newChecksum = generateChecksum(fileBuffer);
-    return newChecksum === originalChecksum; // Return true if the checksums match
 }
