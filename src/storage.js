@@ -1,10 +1,13 @@
-import fs from 'fs/promises';
-import path from 'path';
+// upload a file
+function uploadFile(filePath) {
 
-export async function storeChunks(chunks, folderPaths) {
-    for (const chunk of chunks) {
-        const folderPath = folderPaths[chunk.index % folderPaths.length];
-        const filePath = path.join(folderPath, `chunk_${chunk.index}`);
-        await fs.writeFile(filePath, chunk.data);
-    }
 }
+
+// download a file
+function downloadFile(filePath) {
+
+}
+
+const pdfLocation = '../test.pdf';
+
+uploadFile(pdfLocation)
